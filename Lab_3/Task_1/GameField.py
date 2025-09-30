@@ -3,6 +3,10 @@ from typing import List, Optional, Tuple
 
 from Units import *
 
+import copy
+import random
+from typing import List, Optional, Tuple, Dict
+
 class GameField:
     """Класс игрового поля - контейнер для юнитов и управления ими"""
     
