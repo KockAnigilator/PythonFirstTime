@@ -1,7 +1,4 @@
-from abc import *
-from Units import *
-from Task_1.GameField import *
-
+# Lab_3/Base.py
 class Base:
     """Класс базы для создания и управления юнитами"""
     
@@ -12,10 +9,9 @@ class Base:
         self.max_health = 500
         self.x = None
         self.y = None
-        self.owned_units = []  # юниты, принадлежащие базе
-        self.resources = 1000  # ресурсы для создания юнитов
+        self.owned_units = []
+        self.resources = 1000
         
-        # Стоимость создания юнитов
         self.unit_costs = {
             'swordsman': 100,
             'spearman': 80,
@@ -33,8 +29,8 @@ class Base:
     def get_position(self):
         return (self.x, self.y)
     
-    def create_unit(self, unit_type: str, game_field: 'GameField') -> bool:
-        """Создать юнит и разместить его рядом с базой"""
+    def create_unit(self, unit_type: str, game_field) -> bool:
+        """Создать юнит - game_field передается как параметр, без импорта"""
         if len(self.owned_units) >= self.max_units:
             print(f"❌ Достигнуто максимальное количество юнитов: {self.max_units}")
             return False
@@ -48,21 +44,20 @@ class Base:
             print(f"❌ Недостаточно ресурсов. Нужно: {cost}, есть: {self.resources}")
             return False
         
-        # Создаем юнит
-        from Units import UnitFactory
+        # Импортируем UnitFactory локально, чтобы избежать циклических импортов
+        from .Units import UnitFactory
+        
         try:
             unit = UnitFactory.create_unit(unit_type)
         except ValueError as e:
             print(f"❌ Ошибка создания юнита: {e}")
             return False
         
-        # Ищем свободную клетку рядом с базой
         spawn_x, spawn_y = self._find_spawn_position(game_field)
         if spawn_x is None:
             print("❌ Нет свободных клеток для размещения юнита рядом с базой")
             return False
         
-        # Размещаем юнита на поле
         if game_field.add_unit(unit, spawn_x, spawn_y):
             self.owned_units.append(unit)
             self.resources -= cost
@@ -72,16 +67,14 @@ class Base:
         
         return False
     
-    def _find_spawn_position(self, game_field: 'GameField') -> tuple:
-        """Найти свободную позицию для спавна рядом с базой"""
+    def _find_spawn_position(self, game_field) -> tuple:
         if self.x is None or self.y is None:
             return (None, None)
         
-        # Проверяем клетки в радиусе 2 от базы
         for dy in range(-2, 3):
             for dx in range(-2, 3):
                 if dx == 0 and dy == 0:
-                    continue  # пропускаем саму базу
+                    continue
                 
                 spawn_x, spawn_y = self.x + dx, self.y + dy
                 if (game_field._is_valid_position(spawn_x, spawn_y) and 
@@ -91,12 +84,10 @@ class Base:
         return (None, None)
     
     def collect_resources(self, amount: int = 100):
-        """Собрать ресурсы"""
         self.resources += amount
         print(f"💰 {self.name} собирает {amount} ресурсов. Всего: {self.resources}")
     
     def take_damage(self, damage: int) -> int:
-        """Получить урон"""
         actual_damage = damage
         self.health -= actual_damage
         if self.health <= 0:
@@ -108,7 +99,6 @@ class Base:
         return self.health > 0
     
     def update_units(self):
-        """Обновить список юнитов (удалить мертвых)"""
         alive_units = []
         for unit in self.owned_units:
             if unit.is_alive():
@@ -119,7 +109,6 @@ class Base:
         self.owned_units = alive_units
     
     def get_status(self):
-        """Получить статус базы"""
         status = f"\n🏰 БАЗА '{self.name}':\n"
         status += f"❤️  Здоровье: {self.health}/{self.max_health}\n"
         status += f"💰 Ресурсы: {self.resources}\n"
