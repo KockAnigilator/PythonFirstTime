@@ -1,8 +1,8 @@
-# Lab_3/test_simple.py
 import os
 import sys
 
-sys.path.append(os.path.dirname(__file__))
+# Добавляем путь к Lab_3 для импортов
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'Lab_3'))
 
 from GameField import GameField
 from Units import Swordsman
